@@ -1,11 +1,12 @@
 
 
-var Game = function(screenWidth, screenHeight, tileSize) {
+var Game = function(tileSize, screenWidth, screenHeight) {
     var placedBlocks = []
     var activeBlock = null;
 
-    this.tileWidth = tileSize;
-    this.tileHeight = tileSize;
+    this.tileSize = tileSize;
+    this.screenWidth = screenWidth;
+    this.screenHeight = screenHeight;
 
     // Long skinny block
     this.block1Rotations = [
@@ -76,10 +77,34 @@ var Game = function(screenWidth, screenHeight, tileSize) {
         var blockType =  Math.floor(Math.random() * 4);
         var color = this.colors[Math.floor(Math.random() * 5)];
         switch (blockType) {
-            case 0: return new TetrisBlock(this.block1Rotations, color, this.tileWidth, this.tileHeight);
-            case 1: return new TetrisBlock(this.block2Rotations, color, this.tileWidth, this.tileHeight);
-            case 2: return new TetrisBlock(this.block3Rotations, color, this.tileWidth, this.tileHeight);
-            case 3: return new TetrisBlock(this.block4Rotations, color, this.tileWidth, this.tileHeight);
+            case 0: 
+                return new TetrisBlock(
+                    this.block1Rotations, 
+                    color, 
+                    this.tileSize,
+                    this.screenWidth,
+                    this.screenHeight);
+            case 1: 
+                return new TetrisBlock(
+                    this.block2Rotations, 
+                    color, 
+                    this.tileSize,
+                    this.screenWidth,
+                    this.screenHeight);
+            case 2:
+                return new TetrisBlock(
+                    this.block3Rotations, 
+                    color, 
+                    this.tileSize,
+                    this.screenWidth,
+                    this.screenHeight);
+            case 3:
+                return new TetrisBlock(
+                    this.block4Rotations, 
+                    color, 
+                    this.tileSize,
+                    this.screenWidth,
+                    this.screenHeight);
         }
     }
 }

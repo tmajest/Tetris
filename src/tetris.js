@@ -1,10 +1,17 @@
 
-var TetrisBlock = function(rotations, color, tileWidth, tileHeight) {
+var NO_COLLISION = 0;
+var LEFT_COLLISION = 1;
+var RIGHT_COLLISION = 2;
+var BOTTOM_COLLISION = 3;
+
+var TetrisBlock = function(rotations, color, tileSize, screenWidth, screenHeight) {
     var NUM_TILES_X = 4;
     var NUM_TILES_Y = 4;
 
-    this.tileWidth = tileWidth;
-    this.tileHeight = tileHeight;
+    this.tileWidth = tileSize;
+    this.tileHeight = tileSize;
+    this.screenWidth = screenWidth;
+    this.screenHeight = screenHeight;
     this.rotationIndex = 0;
     this.rotations = rotations;
     this.activeTiles = [];
@@ -16,7 +23,7 @@ var TetrisBlock = function(rotations, color, tileWidth, tileHeight) {
         for (var i = 0; i < NUM_TILES_X; i++) {
             this.coordinates.push([]);
             for (var j = 0; j < NUM_TILES_Y; j++) {
-                this.coordinates[i].push(createVector(j * tileWidth, i * tileHeight));
+                this.coordinates[i].push(createVector(j * this.tileWidth, i * this.tileHeight));
             }
         }    
     };
@@ -24,7 +31,7 @@ var TetrisBlock = function(rotations, color, tileWidth, tileHeight) {
     this.rotateRight = function() {
         var newRotation = (this.rotationIndex + 1) % this.rotations.length;
         var newActiveTiles = this.getActiveTiles(this.coordinates, newRotation);
-        if (this.checkBounds(newActiveTiles)) {
+        if (this.getCollisionsHelper(newActiveTiles) === NO_COLLISION) {
             this.rotationIndex = newRotation;
             this.activeTiles = newActiveTiles;
         }
@@ -33,7 +40,7 @@ var TetrisBlock = function(rotations, color, tileWidth, tileHeight) {
     this.rotateLeft = function() {
         var newRotation = (this.rotationIndex + this.rotations.length - 1) % this.rotations.length;
         var newActiveTiles = this.getActiveTiles(this.coordinates, newRotation);
-        if (this.checkBounds(newActiveTiles)) {
+        if (this.getCollisionsHelper(newActiveTiles) === NO_COLLISION) {
             this.rotationIndex = newRotation;
             this.activeTiles = newActiveTiles;
         }
@@ -42,10 +49,13 @@ var TetrisBlock = function(rotations, color, tileWidth, tileHeight) {
     this.updateCoordinates = function(xDiff, yDiff) {
         var newCoordinates = this.getNewCoordinates(xDiff, yDiff);
         var newActiveTiles = this.getActiveTiles(newCoordinates, this.rotationIndex);
-        if (this.checkBounds(newActiveTiles)) {
+        var collision = this.getCollisionsHelper(newActiveTiles);
+        if (collision === NO_COLLISION) {
             this.coordinates = newCoordinates;
             this.activeTiles = newActiveTiles;
         }
+
+        return collision;
     };
 
     this.getNewCoordinates = function(xDiff, yDiff) {
@@ -74,22 +84,38 @@ var TetrisBlock = function(rotations, color, tileWidth, tileHeight) {
         return newActive;
     }
 
-    this.checkBounds = function(tiles) {
+    this.getCollisions = function() {
+        return this.getCollisionsHelper(this.activeTiles);
+    }
+
+    this.getCollisionsHelper = function(tiles) {
         for (var i = 0; i < tiles.length; i++) {
             var tile = tiles[i];
-            if (tile.x < 0 || tile.x + this.tileWidth >= this.screenWidth ||
-                tile.y < 0 || tile.y + this.tileHeight >= this.screenHeight) {
-                return false;
-            }
+            if (tile.x < 0)
+                return LEFT_COLLISION;
+            else if (tile.x + this.tileWidth > this.screenWidth)
+                return RIGHT_COLLISION;
+            else if (tile.y + this.tileHeight > this.screenHeight)
+                return BOTTOM_COLLISION;
         }
-        return true;
+        return NO_COLLISION;
+    }
+
+    this.checkBottom = function() {
+        for (var i = 0; i < this.activeTiles.length; i++) {
+            var tile = this.activeTiles[i];
+            if (tile.y + this.tileHeight >= this.screenHeight)
+                return BOTTOM_COLLISION;
+        }
+
+        return NO_COLLISION;
     }
 
     this.draw = function() {
         fill(block.color);
         for (var i = 0; i < this.activeTiles.length; i++) {
             var tile = this.activeTiles[i];
-            rect(tile.x, tile.y, tileWidth, tileHeight);
+            rect(tile.x, tile.y, this.tileWidth, this.tileHeight);
         }
     }
 
