@@ -26,15 +26,11 @@ function draw() {
         fallTime = 0;
     }
 
-    if (block.coordinates[0][0].y > displayHeight) {
+    if (!block.checkBounds(0, 0)) {
         block = game.createBlock();
     }
 }
 
-function mouseClicked() {
-    block.rotateRight();
-}
-
 function keyPressed() {
-    block.keyPressed();
+    block.keyPressed(game.placedTiles);
 }
