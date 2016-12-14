@@ -1,7 +1,7 @@
 
 var game;
 var block;
-var screenWidth = 640;
+var screenWidth = 400;
 var screenHeight = 480;
 var tileSize = 20;
 
@@ -17,6 +17,7 @@ function setup() {
 
 function draw() {
     clear();
+    background(100);
     block.draw();
 
     // Make block fall
@@ -25,14 +26,6 @@ function draw() {
         block.updateCoordinates(0, 1);
         fallTime = 0;
     }
-
-    if (block.coordinates[0][0].y > displayHeight) {
-        block = game.createBlock();
-    }
-}
-
-function mouseClicked() {
-    block.rotateRight();
 }
 
 function keyPressed() {
