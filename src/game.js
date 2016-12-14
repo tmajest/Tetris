@@ -1,13 +1,11 @@
 
-
-var Game = function(screenWidth, screenHeight, tileSize) {
-    var placedTiles = []
+var Game = function(tileSize, screenWidth, screenHeight) {
+    var placedBlocks = []
     var activeBlock = null;
 
+    this.tileSize = tileSize;
     this.screenWidth = screenWidth;
     this.screenHeight = screenHeight;
-    this.tileWidth = tileSize;
-    this.tileHeight = tileSize;
 
     // Long skinny block
     this.block1Rotations = [
@@ -87,28 +85,28 @@ var Game = function(screenWidth, screenHeight, tileSize) {
                 return new TetrisBlock(
                     this.block1Rotations, 
                     color, 
-                    this.tileWidth, 
+                    this.tileSize,
                     this.screenWidth,
                     this.screenHeight);
             case 1: 
                 return new TetrisBlock(
                     this.block2Rotations, 
                     color, 
-                    this.tileWidth, 
+                    this.tileSize,
                     this.screenWidth,
                     this.screenHeight);
-            case 2: 
+            case 2:
                 return new TetrisBlock(
                     this.block3Rotations, 
                     color, 
-                    this.tileWidth, 
+                    this.tileSize,
                     this.screenWidth,
                     this.screenHeight);
             case 3:
                 return new TetrisBlock(
                     this.block4Rotations, 
                     color, 
-                    this.tileWidth, 
+                    this.tileSize,
                     this.screenWidth,
                     this.screenHeight);
         }

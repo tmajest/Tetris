@@ -1,7 +1,7 @@
 
 var game;
 var block;
-var screenWidth = 640;
+var screenWidth = 400;
 var screenHeight = 480;
 var tileSize = 20;
 
@@ -11,23 +11,24 @@ var fallTime = 0;
 function setup() {
     createCanvas(screenWidth, screenHeight);
 
-    game = new Game(screenWidth, screenHeight, tileSize);
+    game = new Game(tileSize, screenWidth, screenHeight);
     block = game.createBlock();
 }
 
 function draw() {
     clear();
+    background(100);
+
     block.draw();
 
     // Make block fall
     fallTime++;
     if (fallTime > fallRate) {
+        if (block.checkBottom() === BOTTOM_COLLISION)
+            block = game.createBlock();
+
         block.updateCoordinates(0, 1);
         fallTime = 0;
-    }
-
-    if (!block.checkBounds(0, 0)) {
-        block = game.createBlock();
     }
 }
 
