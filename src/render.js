@@ -7,6 +7,8 @@
         };
 
         p.draw = function() {
+            game.update()
+
             p.clear();
             p.background(100);
 
@@ -22,19 +24,17 @@
                 p.fill(placedTile.color);
                 p.rect(placedTile.x, placedTile.y, settings.tileSize, settings.tileSize);
             }
-
-            game.update()
         };
 
         p.keyPressed = function() {
             if (p.keyCode === p.LEFT_ARROW) {
-                game.block.updateCoordinates(-1, 0);
+                game.block.updateCoordinates(-1, 0, true, game.tiles);
             } else if (p.keyCode === p.RIGHT_ARROW) {
-                game.block.updateCoordinates(1, 0);
+                game.block.updateCoordinates(1, 0, true, game.tiles);
             } else if (p.keyCode === p.UP_ARROW) {
-                game.block.rotateRight();
+                game.block.rotateRight(game.tiles);
             } else if (p.keyCode === p.DOWN_ARROW) {
-                game.block.updateCoordinates(0, 1);
+                game.block.updateCoordinates(0, 1, false);
             }
         };
     }),

@@ -1,6 +1,7 @@
 
 (function(game, shapes, settings) {
     var fallTime;
+    var MAX_COLS = 10;
 
     game.block = null;
     game.tiles = [];
@@ -48,22 +49,50 @@
         return game.block.activeTiles;
     };
 
-    game.update = function() {
-        if (game.block.checkBottom() == game.BOTTOM_COLLISION) {
-            for (var i = 0; i < game.block.activeTiles.length; i++) {
-                game.tiles.push(game.block.activeTiles[i]);
-                game.block = game.newBlock();
+    game.removeFullRows = function() {
+        var counts = {};
+        var removeY = -1;
+        for (var i = 0; i < game.tiles.length; i++) {
+            var tile = game.tiles[i];    
+            if (tile.y in counts) {
+                counts[tile.y].push(tile);
+            } else {
+                counts[tile.y] = [tile];
+            }
+
+            if (counts[tile.y].length === MAX_COLS) {
+                removeY = tile.y;  
+                break;
             }
         }
 
-        // Make block fall
-        if (fallTime++ > settings.fallRate) {
-            //if (block.checkBottom() === BOTTOM_COLLISION)
-                //block = game.createBlock();
+        if (removeY >= 0) {
+            game.tiles = game.tiles.filter(function(t) {
+                return t.y !== removeY;
+            });    
 
-            game.block.updateCoordinates(0, 1);
+            for (var i = 0; i < game.tiles.length; i++) {
+                var tile = game.tiles[i];
+                tile.y += settings.tileSize;
+            }
+        }
+    };
+
+    game.update = function() {
+        if (fallTime++ > settings.fallRate) {
+            game.block.updateCoordinates(0, 1, false);
             fallTime = 0;
         };
+
+        if (game.block.checkBottom(game.tiles) === game.BOTTOM_COLLISION) {
+            game.block.updateCoordinates(0, -1, false);
+            for (var i = 0; i < game.block.activeTiles.length; i++) {
+                game.tiles.push(game.block.activeTiles[i]);
+            }
+            game.block = game.newBlock();
+            game.removeFullRows();
+        }
+
     }
 
     game.init = function() {

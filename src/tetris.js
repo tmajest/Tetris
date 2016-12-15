@@ -20,40 +20,48 @@
             for (var i = 0; i < NUM_TILES_X; i++) {
                 this.coordinates.push([]);
                 for (var j = 0; j < NUM_TILES_Y; j++) {
-                    this.coordinates[i].push(settings.createVector(j * settings.tileSize, i * settings.tileSize));
+                    this.coordinates[i].push(
+                        settings.createVector(
+                            j * settings.tileSize, 
+                            i * settings.tileSize));
                 }
             }    
             this.activeTiles = this.getActiveTiles(this.coordinates, 0);
         };
 
-        this.rotateRight = function() {
+        this.rotateRight = function(tilesToCheck) {
             var newRotation = (this.rotationIndex + 1) % this.rotations.length;
             var newActiveTiles = this.getActiveTiles(this.coordinates, newRotation);
-            if (this.getCollisionsHelper(newActiveTiles) === game.NO_COLLISION) {
+            if (this.getCollisionsHelper(newActiveTiles, tilesToCheck) === game.NO_COLLISION) {
                 this.rotationIndex = newRotation;
                 this.activeTiles = newActiveTiles;
             }
         };
 
-        this.rotateLeft = function() {
+        this.rotateLeft = function(tilesToCheck) {
             var newRotation = (this.rotationIndex + this.rotations.length - 1) % this.rotations.length;
             var newActiveTiles = this.getActiveTiles(this.coordinates, newRotation);
-            if (this.getCollisionsHelper(newActiveTiles) === game.NO_COLLISION) {
+            if (this.getCollisionsHelper(newActiveTiles, tilesToCheck) === game.NO_COLLISION) {
                 this.rotationIndex = newRotation;
                 this.activeTiles = newActiveTiles;
             }
         };
 
-        this.updateCoordinates = function(xDiff, yDiff) {
+        this.updateCoordinates = function(xDiff, yDiff, checkCollisions, tilesToCheck) {
             var newCoordinates = this.getNewCoordinates(xDiff, yDiff);
             var newActiveTiles = this.getActiveTiles(newCoordinates, this.rotationIndex);
-            var collision = this.getCollisionsHelper(newActiveTiles);
-            if (collision === game.NO_COLLISION) {
-                this.coordinates = newCoordinates;
-                this.activeTiles = newActiveTiles;
+            if (checkCollisions) {
+                var collision = this.getCollisionsHelper(newActiveTiles, tilesToCheck);
+                if (collision === game.NO_COLLISION) {
+                    this.coordinates = newCoordinates;
+                    this.activeTiles = newActiveTiles;
+                }
+
+                return collision;
             }
 
-            return collision;
+            this.coordinates = newCoordinates;
+            this.activeTiles = newActiveTiles;
         };
 
         this.getNewCoordinates = function(xDiff, yDiff) {
@@ -83,11 +91,11 @@
             return newActive;
         }
 
-        this.getCollisions = function() {
-            return this.getCollisionsHelper(this.activeTiles);
+        this.getCollisions = function(tilesToCheck) {
+            return this.getCollisionsHelper(this.activeTiles, tilesToCheck);
         }
 
-        this.getCollisionsHelper = function(tiles) {
+        this.getCollisionsHelper = function(tiles, tilesToCheck) {
             for (var i = 0; i < tiles.length; i++) {
                 var tile = tiles[i];
                 if (tile.x < 0)
@@ -96,15 +104,29 @@
                     return game.RIGHT_COLLISION;
                 else if (tile.y + settings.tileSize > settings.screenHeight)
                     return game.BOTTOM_COLLISION;
+
+                for (var j = 0; j < tilesToCheck.length; j++) {
+                    var tileToCheck = tilesToCheck[j];
+                    if (tile.x === tileToCheck.x && tile.y === tileToCheck.y) {
+                        return game.RIGHT_COLLISION; 
+                    }
+                }
             }
             return game.NO_COLLISION;
         }
 
-        this.checkBottom = function() {
+        this.checkBottom = function(tilesToCheck) {
             for (var i = 0; i < this.activeTiles.length; i++) {
                 var tile = this.activeTiles[i];
                 if (tile.y + settings.tileSize >= settings.screenHeight)
                     return game.BOTTOM_COLLISION;
+
+                for (var j = 0; j < tilesToCheck.length; j++) {
+                    var tileToCheck = tilesToCheck[j];
+                    if (tile.x === tileToCheck.x && tile.y === tileToCheck.y) {
+                        return game.BOTTOM_COLLISION;
+                    }
+                }
             }
 
             return game.NO_COLLISION;
