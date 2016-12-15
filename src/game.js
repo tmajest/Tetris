@@ -51,7 +51,7 @@
 
     game.removeFullRows = function() {
         var counts = {};
-        var removeY = -1;
+        var toRemove = [];
         for (var i = 0; i < game.tiles.length; i++) {
             var tile = game.tiles[i];    
             if (tile.y in counts) {
@@ -61,19 +61,18 @@
             }
 
             if (counts[tile.y].length === MAX_COLS) {
-                removeY = tile.y;  
-                break;
+                toRemove.push(tile.y);
             }
         }
 
-        if (removeY >= 0) {
+        if (toRemove.length > 0) {
             game.tiles = game.tiles.filter(function(t) {
-                return t.y !== removeY;
+                return toRemove.indexOf(t) < 0;
             });    
 
             for (var i = 0; i < game.tiles.length; i++) {
                 var tile = game.tiles[i];
-                tile.y += settings.tileSize;
+                tile.y += settings.tileSize * toRemove.length;
             }
         }
     };
