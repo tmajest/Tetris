@@ -1,37 +1,42 @@
 
-var game;
-var block;
-var screenWidth = 400;
-var screenHeight = 480;
-var tileSize = 20;
+(function(render, game, settings) {})(window.render = window.render || 
+    new p5(function(p) {
+        p.setup = function() {
+            p.createCanvas(settings.screenWidth, settings.screenHeight);
+            game.init();
+        };
 
-var fallRate = 30;
-var fallTime = 0;
+        p.draw = function() {
+            p.clear();
+            p.background(100);
 
-function setup() {
-    createCanvas(screenWidth, screenHeight);
+            p.fill(game.block.color);
+            var blockTiles = game.block.activeTiles;
+            for (var i = 0; i < blockTiles.length; i++) {
+                var tile = blockTiles[i];
+                p.rect(tile.x, tile.y, settings.tileSize, settings.tileSize);
+            }
 
-    game = new Game(tileSize, screenWidth, screenHeight);
-    block = game.createBlock();
-}
+            for (var i = 0; i < game.tiles.length; i++) {
+                var placedTile = game.tiles[i];
+                p.fill(placedTile.color);
+                p.rect(placedTile.x, placedTile.y, settings.tileSize, settings.tileSize);
+            }
 
-function draw() {
-    clear();
-    background(100);
+            game.update()
+        };
 
-    block.draw();
-
-    // Make block fall
-    fallTime++;
-    if (fallTime > fallRate) {
-        if (block.checkBottom() === BOTTOM_COLLISION)
-            block = game.createBlock();
-
-        block.updateCoordinates(0, 1);
-        fallTime = 0;
-    }
-}
-
-function keyPressed() {
-    block.keyPressed();
-}
+        p.keyPressed = function() {
+            if (p.keyCode === p.LEFT_ARROW) {
+                game.block.updateCoordinates(-1, 0);
+            } else if (p.keyCode === p.RIGHT_ARROW) {
+                game.block.updateCoordinates(1, 0);
+            } else if (p.keyCode === p.UP_ARROW) {
+                game.block.rotateRight();
+            } else if (p.keyCode === p.DOWN_ARROW) {
+                game.block.updateCoordinates(0, 1);
+            }
+        };
+    }),
+    game,
+    settings);

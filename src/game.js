@@ -1,114 +1,73 @@
 
-var Game = function(tileSize, screenWidth, screenHeight) {
-    var placedBlocks = []
-    var activeBlock = null;
+(function(game, shapes, settings) {
+    var fallTime;
 
-    this.tileSize = tileSize;
-    this.screenWidth = screenWidth;
-    this.screenHeight = screenHeight;
+    game.block = null;
+    game.tiles = [];
 
-    // Long skinny block
-    this.block1Rotations = [
-        [[0, 1, 0, 0],
-         [0, 1, 0, 0],
-         [0, 1, 0, 0],
-         [0, 1, 0, 0]],
+    var colors = [
+        "green",
+        "blue", 
+        "magenta", 
+        "yellow", 
+        "red"];
 
-        [[0, 0, 0, 0],
-         [1, 1, 1, 1],
-         [0, 0, 0, 0],
-         [0, 0, 0, 0]]];
-
-    // L-shaped block
-    this.block2Rotations = [
-        [[0, 0, 0, 0],
-         [0, 1, 1, 0],
-         [0, 1, 0, 0],
-         [0, 1, 0, 0]],
-
-        [[0, 0, 0, 0],
-         [1, 1, 1, 0],
-         [0, 0, 1, 0],
-         [0, 0, 0, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 0, 1, 0],
-         [0, 0, 1, 0],
-         [0, 1, 1, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [1, 0, 0, 0],
-         [1, 1, 1, 0]]];
-
-    // Square block
-    this.block3Rotations = [
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [1, 1, 0, 0],
-         [1, 1, 0, 0]]];
-
-    // T-shaped block
-    this.block4Rotations = [
-        [[0, 0, 0, 0],
-         [0, 1, 0, 0],
-         [1, 1, 1, 0],
-         [0, 0, 0, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 1, 0, 0],
-         [0, 1, 1, 0],
-         [0, 1, 0, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [1, 1, 1, 0],
-         [0, 1, 0, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 1, 0, 0],
-         [1, 1, 0, 0],
-         [0, 1, 0, 0]]];
-
-    this.colors = [
-        color("green"), 
-        color("blue"), 
-        color("magenta"), 
-        color("yellow"), 
-        color("red")];
-
-    this.createBlock = function() {
-        var blockType =  Math.floor(Math.random() * 4);
-        var color = this.colors[Math.floor(Math.random() * 5)];
+    game.newBlock = function() {
+        var blockType =  Math.floor(Math.random() * 5);
+        var color = colors[Math.floor(Math.random() * 5)];
         switch (blockType) {
             case 0: 
-                return new TetrisBlock(
-                    this.block1Rotations, 
+                return game.createBlock(
+                    shapes.block1,
                     color, 
-                    this.tileSize,
-                    this.screenWidth,
-                    this.screenHeight);
+                    settings);
             case 1: 
-                return new TetrisBlock(
-                    this.block2Rotations, 
+                return game.createBlock(
+                    shapes.block2,
                     color, 
-                    this.tileSize,
-                    this.screenWidth,
-                    this.screenHeight);
+                    settings);
             case 2:
-                return new TetrisBlock(
-                    this.block3Rotations, 
+                return game.createBlock(
+                    shapes.block3,
                     color, 
-                    this.tileSize,
-                    this.screenWidth,
-                    this.screenHeight);
+                    settings);
             case 3:
-                return new TetrisBlock(
-                    this.block4Rotations, 
+                return game.createBlock(
+                    shapes.block4,
                     color, 
-                    this.tileSize,
-                    this.screenWidth,
-                    this.screenHeight);
+                    settings);
+            case 4:
+                return game.createBlock(
+                    shapes.block5,
+                    color, 
+                    settings);
         }
     }
-}
+
+    game.activeTiles = function() {
+        return game.block.activeTiles;
+    };
+
+    game.update = function() {
+        if (game.block.checkBottom() == game.BOTTOM_COLLISION) {
+            for (var i = 0; i < game.block.activeTiles.length; i++) {
+                game.tiles.push(game.block.activeTiles[i]);
+                game.block = game.newBlock();
+            }
+        }
+
+        // Make block fall
+        if (fallTime++ > settings.fallRate) {
+            //if (block.checkBottom() === BOTTOM_COLLISION)
+                //block = game.createBlock();
+
+            game.block.updateCoordinates(0, 1);
+            fallTime = 0;
+        };
+    }
+
+    game.init = function() {
+        fallTime = 0;
+        game.block = game.newBlock();
+    }
+})(window.game = window.game || {}, shapes, settings); 
