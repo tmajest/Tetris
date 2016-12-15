@@ -122,11 +122,11 @@ var TetrisBlock = function(rotations, color, tileSize, screenWidth, screenHeight
 
     this.keyPressed = function() {
         if (keyCode === LEFT_ARROW) {
-            this.updateCoordinates(-1, 0, placedTiles);
+            this.updateCoordinates(-1, 0);
         } else if (keyCode === RIGHT_ARROW) {
-            this.updateCoordinates(1, 0, placedTiles);
+            this.updateCoordinates(1, 0);
         } else if (keyCode === UP_ARROW) {
-            this.rotateRight(placedTiles);
+            this.rotateRight();
         } else if (keyCode === DOWN_ARROW) {
             this.updateCoordinates(0, 1);
         }

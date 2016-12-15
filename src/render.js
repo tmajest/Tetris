@@ -33,5 +33,5 @@ function draw() {
 }
 
 function keyPressed() {
-    block.keyPressed(game.placedTiles);
+    block.keyPressed();
 }
