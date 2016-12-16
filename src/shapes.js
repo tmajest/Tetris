@@ -2,7 +2,7 @@
 (function(shapes) {
 
     // Long skinny block
-    shapes.block1 = [
+    var block1 = [
         [[0, 1, 0, 0],
          [0, 1, 0, 0],
          [0, 1, 0, 0],
@@ -14,7 +14,7 @@
          [0, 0, 0, 0]]];
 
     // L-shaped block
-    shapes.block2 = [
+    var block2 = [
         [[0, 0, 0, 0],
          [0, 1, 1, 0],
          [0, 1, 0, 0],
@@ -36,7 +36,7 @@
          [0, 0, 0, 0]]];
 
     // Another L-shaped block
-    shapes.block3 = [
+    var block3 = [
         [[0, 0, 0, 0],
          [0, 1, 1, 0],
          [0, 0, 1, 0],
@@ -58,14 +58,14 @@
          [0, 1, 0, 0]]];
 
     // Square block
-    shapes.block4 = [
+    var block4 = [
         [[0, 0, 0, 0],
          [0, 0, 0, 0],
          [1, 1, 0, 0],
          [1, 1, 0, 0]]];
 
     // T-shaped block
-    shapes.block5 = [
+    var block5 = [
         [[0, 0, 0, 0],
          [0, 1, 0, 0],
          [0, 1, 1, 0],
@@ -85,5 +85,38 @@
          [0, 1, 0, 0],
          [1, 1, 1, 0],
          [0, 0, 0, 0]]];
-})(window.shapes = window.shapes || {});
 
+     var block6 = [
+        [[0, 0, 0, 0],
+         [0, 1, 0, 0],
+         [1, 1, 0, 0],
+         [1, 0, 0, 0]],
+
+        [[0, 0, 0, 0],
+         [1, 1, 0, 0],
+         [0, 1, 1, 0],
+         [0, 0, 0, 0]],
+
+        [[0, 0, 0, 0],
+         [0, 0, 1, 0],
+         [0, 1, 1, 0],
+         [0, 1, 0, 0]],
+
+        [[0, 0, 0, 0],
+         [0, 0, 0, 0],
+         [1, 1, 0, 0],
+         [0, 1, 1, 0]]];
+
+     var allShapes = [
+         block1,
+         block2,
+         block3,
+         block4,
+         block5,
+         block6];
+
+     shapes.newShape = function() {
+         return allShapes[Math.floor(Math.random() * allShapes.length)];
+     }
+
+})(window.shapes = window.shapes || {});

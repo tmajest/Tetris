@@ -1,18 +1,20 @@
 
-(function(render, game, settings) {})(window.render = window.render || 
+(function(render, game, colors, settings) {})(window.render = window.render ||
     new p5(function(p) {
         p.setup = function() {
             p.createCanvas(settings.screenWidth, settings.screenHeight);
             game.init();
+            p.strokeWeight(3);
         };
 
         p.draw = function() {
             game.update()
 
             p.clear();
-            p.background(100);
+            p.background(colors.backgroundColor);
 
-            p.fill(game.block.color);
+            p.fill(game.block.color.fillColor);
+            p.stroke(game.block.color.outlineColor);
             var blockTiles = game.block.activeTiles;
             for (var i = 0; i < blockTiles.length; i++) {
                 var tile = blockTiles[i];
@@ -21,7 +23,8 @@
 
             for (var i = 0; i < game.tiles.length; i++) {
                 var placedTile = game.tiles[i];
-                p.fill(placedTile.color);
+                p.fill(placedTile.color.fillColor);
+                p.stroke(placedTile.color.outlineColor);
                 p.rect(placedTile.x, placedTile.y, settings.tileSize, settings.tileSize);
             }
         };

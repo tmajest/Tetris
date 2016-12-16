@@ -1,48 +1,16 @@
 
-(function(game, shapes, settings) {
+(function(game, shapes, colors, settings) {
     var fallTime;
     var MAX_COLS = 10;
 
     game.block = null;
     game.tiles = [];
 
-    var colors = [
-        "green",
-        "blue", 
-        "magenta", 
-        "yellow", 
-        "red"];
 
     game.newBlock = function() {
-        var blockType =  Math.floor(Math.random() * 5);
-        var color = colors[Math.floor(Math.random() * 5)];
-        switch (blockType) {
-            case 0: 
-                return game.createBlock(
-                    shapes.block1,
-                    color, 
-                    settings);
-            case 1: 
-                return game.createBlock(
-                    shapes.block2,
-                    color, 
-                    settings);
-            case 2:
-                return game.createBlock(
-                    shapes.block3,
-                    color, 
-                    settings);
-            case 3:
-                return game.createBlock(
-                    shapes.block4,
-                    color, 
-                    settings);
-            case 4:
-                return game.createBlock(
-                    shapes.block5,
-                    color, 
-                    settings);
-        }
+        var shape = shapes.newShape();
+        var color = colors.newColor();
+        return game.createBlock(shape, color, settings);
     }
 
     game.activeTiles = function() {
@@ -51,9 +19,9 @@
 
     game.removeFullRows = function() {
         var counts = {};
-        var removeY = -1;
+        var toRemove = [];
         for (var i = 0; i < game.tiles.length; i++) {
-            var tile = game.tiles[i];    
+            var tile = game.tiles[i];
             if (tile.y in counts) {
                 counts[tile.y].push(tile);
             } else {
@@ -61,19 +29,22 @@
             }
 
             if (counts[tile.y].length === MAX_COLS) {
-                removeY = tile.y;  
-                break;
+                toRemove.push(tile.y);
             }
         }
 
-        if (removeY >= 0) {
-            game.tiles = game.tiles.filter(function(t) {
-                return t.y !== removeY;
-            });    
+        if (toRemove.length >= 0) {
+            // Remove tiles in full rows
+            for (var i = game.tiles.length - 1; i >= 0; i--) {
+                var tile = game.tiles[i];
+                if (toRemove.indexOf(tile.y) >= 0)
+                    game.tiles.splice(i, 1);
+            }
 
+            // Push down rest of tiles
             for (var i = 0; i < game.tiles.length; i++) {
                 var tile = game.tiles[i];
-                tile.y += settings.tileSize;
+                tile.y += settings.tileSize * toRemove.length;
             }
         }
     };
@@ -99,4 +70,4 @@
         fallTime = 0;
         game.block = game.newBlock();
     }
-})(window.game = window.game || {}, shapes, settings); 
+})(window.game = window.game || {}, shapes, colors, settings);
