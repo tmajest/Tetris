@@ -1,122 +1,87 @@
 
+/**
+ * Module to handle different types of tetris shapes.
+ */
 (function(shapes) {
 
     // Long skinny block
-    var block1 = [
+    shapes.block1 =
         [[0, 1, 0, 0],
          [0, 1, 0, 0],
          [0, 1, 0, 0],
-         [0, 1, 0, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [1, 1, 1, 1],
-         [0, 0, 0, 0]]];
+         [0, 1, 0, 0]];
 
     // L-shaped block
-    var block2 = [
+    shapes.block2 =
         [[0, 0, 0, 0],
          [0, 1, 1, 0],
          [0, 1, 0, 0],
-         [0, 1, 0, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [1, 1, 1, 0],
-         [0, 0, 1, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 1, 0, 0],
-         [0, 1, 0, 0],
-         [1, 1, 0, 0]],
-
-        [[0, 0, 0, 0],
-         [1, 0, 0, 0],
-         [1, 1, 1, 0],
-         [0, 0, 0, 0]]];
+         [0, 1, 0, 0]];
 
     // Another L-shaped block
-    var block3 = [
+    shapes.block3 =
         [[0, 0, 0, 0],
          [0, 1, 1, 0],
          [0, 0, 1, 0],
-         [0, 0, 1, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [0, 0, 1, 0],
-         [1, 1, 1, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 0, 1, 0],
-         [0, 0, 1, 0],
-         [0, 0, 1, 1]],
-
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [0, 1, 1, 1],
-         [0, 1, 0, 0]]];
+         [0, 0, 1, 0]];
 
     // Square block
-    var block4 = [
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [1, 1, 0, 0],
-         [1, 1, 0, 0]]];
+    shapes.block4 =
+        [[1, 1],
+         [1, 1]];
 
     // T-shaped block
-    var block5 = [
-        [[0, 0, 0, 0],
-         [0, 1, 0, 0],
-         [0, 1, 1, 0],
-         [0, 1, 0, 0]],
+    shapes.block5 =
+        [[0, 1, 0],
+         [1, 1, 1],
+         [0, 0, 0]];
 
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [1, 1, 1, 0],
-         [0, 1, 0, 0]],
+     // Don't know what to call this shape
+     shapes.block6 =
+        [[0, 0, 0],
+         [0, 1, 1],
+         [1, 1, 0]];
 
-        [[0, 0, 0, 0],
-         [0, 1, 0, 0],
-         [1, 1, 0, 0],
-         [0, 1, 0, 0]],
+     // Don't know what to call this shape, part 2
+     shapes.block7 =
+        [[0, 0, 0],
+         [1, 1, 0],
+         [0, 1, 1]];
 
-        [[0, 0, 0, 0],
-         [0, 1, 0, 0],
-         [1, 1, 1, 0],
-         [0, 0, 0, 0]]];
+     /**
+      * List containing all of the tetris shapes.
+      */
+     shapes.all = [
+         shapes.block1,
+         shapes.block2,
+         shapes.block3,
+         shapes.block4,
+         shapes.block5,
+         shapes.block6,
+         shapes.block7];
 
-     var block6 = [
-        [[0, 0, 0, 0],
-         [0, 1, 0, 0],
-         [1, 1, 0, 0],
-         [1, 0, 0, 0]],
+     /**
+      * Shapes by their probability of being selected. Shapes that don't have
+      * a mirror image of themselves as a new shape (e.g Block1, Block 4), will
+      * be twice as likely as a T shaped block from being selected.  This prevents
+      * too many mirror image blocks from being selected.
+      */
+     shapes.probabilityTable = [
+         shapes.block1,
+         shapes.block1,
+         shapes.block2,
+         shapes.block3,
+         shapes.block4,
+         shapes.block4,
+         shapes.block5,
+         shapes.block5,
+         shapes.block6,
+         shapes.block7];
 
-        [[0, 0, 0, 0],
-         [1, 1, 0, 0],
-         [0, 1, 1, 0],
-         [0, 0, 0, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 0, 1, 0],
-         [0, 1, 1, 0],
-         [0, 1, 0, 0]],
-
-        [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [1, 1, 0, 0],
-         [0, 1, 1, 0]]];
-
-     var allShapes = [
-         block1,
-         block2,
-         block3,
-         block4,
-         block5,
-         block6];
-
-     shapes.newShape = function() {
-         return allShapes[Math.floor(Math.random() * allShapes.length)];
+     /**
+      * Returns a randomly chosen new shape.
+      */
+     shapes.randomShape = function() {
+         return shapes.probabilityTable[Math.floor(Math.random() * shapes.probabilityTable.length)];
      }
-
 })(window.shapes = window.shapes || {});

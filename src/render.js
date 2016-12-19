@@ -1,45 +1,80 @@
 
-(function(render, game, colors, settings) {})(window.render = window.render ||
+/**
+ * Render the game board and tetris blocks.
+ */
+(function(render, tetris, colors, settings) {})(
+    window.render = window.render ||
     new p5(function(p) {
+
+        /**
+         * P5 setup function.
+         */
         p.setup = function() {
             p.createCanvas(settings.screenWidth, settings.screenHeight);
-            game.init();
+            tetris.init();
             p.strokeWeight(3);
         };
 
+        /**
+         * P5 draw function.
+         */
         p.draw = function() {
-            game.update()
-
             p.clear();
             p.background(colors.backgroundColor);
 
-            p.fill(game.block.color.fillColor);
-            p.stroke(game.block.color.outlineColor);
-            var blockTiles = game.block.activeTiles;
-            for (var i = 0; i < blockTiles.length; i++) {
-                var tile = blockTiles[i];
-                p.rect(tile.x, tile.y, settings.tileSize, settings.tileSize);
+            // Update the game state every 40 frames
+            if (p.frameCount % settings.fallRate === 0) {
+                tetris.update();
             }
 
-            for (var i = 0; i < game.tiles.length; i++) {
-                var placedTile = game.tiles[i];
-                p.fill(placedTile.color.fillColor);
-                p.stroke(placedTile.color.outlineColor);
-                p.rect(placedTile.x, placedTile.y, settings.tileSize, settings.tileSize);
+            // Draw placed tiles
+            for (var i = 0; i < tetris.COLS; i++) {
+                for (var j = 0; j < tetris.ROWS; j++) {
+                    var color = tetris.board[i][j];
+                    if (color) {
+                        p.fill(color.fillColor);
+                        p.stroke(color.outlineColor);
+                        p.rect(
+                            i * settings.tileSize,
+                            j * settings.tileSize,
+                            settings.tileSize,
+                            settings.tileSize);
+                    }
+                }
+            }
+
+            // Draw active block
+            var n = tetris.block.matrix.length;
+            for (var i = 0; i < n; i++) {
+                for (var j = 0; j < n; j++) {
+                    if (tetris.block.matrix[i][j] === 1) {
+                        p.fill(tetris.block.color.fillColor);
+                        p.stroke(tetris.block.color.outlineColor);
+                        p.rect(
+                            (tetris.block.x + i) * settings.tileSize,
+                            (tetris.block.y + j) * settings.tileSize,
+                            settings.tileSize,
+                            settings.tileSize);
+                    }
+                }
             }
         };
 
+        /**
+         * KeyPressed function - handle moving and rotating the active tetris block.
+         */
         p.keyPressed = function() {
             if (p.keyCode === p.LEFT_ARROW) {
-                game.block.updateCoordinates(-1, 0, true, game.tiles);
+                tetris.moveBlock(-1, 0);
             } else if (p.keyCode === p.RIGHT_ARROW) {
-                game.block.updateCoordinates(1, 0, true, game.tiles);
+                tetris.moveBlock(1, 0);
             } else if (p.keyCode === p.UP_ARROW) {
-                game.block.rotateRight(game.tiles);
+                tetris.rotateBlock();
             } else if (p.keyCode === p.DOWN_ARROW) {
-                game.block.updateCoordinates(0, 1, false);
+                tetris.moveBlock(0, 1);
             }
         };
     }),
-    game,
+    tetris,
+    colors,
     settings);

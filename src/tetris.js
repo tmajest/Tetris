@@ -1,141 +1,133 @@
 
-(function(game, settings) {
-    game.NO_COLLISION = 0;
-    game.LEFT_COLLISION = 1;
-    game.RIGHT_COLLISION = 2;
-    game.BOTTOM_COLLISION = 3;
+/**
+ * Handles tetris board and game logic.
+ */
+(function(tetris, shapes, colors, utils, settings) {
 
-    game.tetrisBlock = function(rotations, color, settings) {
-        var NUM_TILES_X = 4;
-        var NUM_TILES_Y = 4;
+    var fallTime = 0;
 
-        this.rotationIndex = 0;
-        this.rotations = rotations;
-        this.activeTiles = [];
-        this.coordinates = [];
-        this.color = color;
+    tetris.ROWS = 24;
+    tetris.COLS = 10;
 
-        this.setup = function() {
-            this.coordinates = [];
-            for (var i = 0; i < NUM_TILES_X; i++) {
-                this.coordinates.push([]);
-                for (var j = 0; j < NUM_TILES_Y; j++) {
-                    this.coordinates[i].push(
-                        settings.createVector(
-                            j * settings.tileSize, 
-                            i * settings.tileSize));
-                }
-            }    
-            this.activeTiles = this.getActiveTiles(this.coordinates, 0);
-        };
+    tetris.block;
+    tetris.board;
 
-        this.rotateRight = function(tilesToCheck) {
-            var newRotation = (this.rotationIndex + 1) % this.rotations.length;
-            var newActiveTiles = this.getActiveTiles(this.coordinates, newRotation);
-            if (this.getCollisionsHelper(newActiveTiles, tilesToCheck) === game.NO_COLLISION) {
-                this.rotationIndex = newRotation;
-                this.activeTiles = newActiveTiles;
-            }
-        };
-
-        this.rotateLeft = function(tilesToCheck) {
-            var newRotation = (this.rotationIndex + this.rotations.length - 1) % this.rotations.length;
-            var newActiveTiles = this.getActiveTiles(this.coordinates, newRotation);
-            if (this.getCollisionsHelper(newActiveTiles, tilesToCheck) === game.NO_COLLISION) {
-                this.rotationIndex = newRotation;
-                this.activeTiles = newActiveTiles;
-            }
-        };
-
-        this.updateCoordinates = function(xDiff, yDiff, checkCollisions, tilesToCheck) {
-            var newCoordinates = this.getNewCoordinates(xDiff, yDiff);
-            var newActiveTiles = this.getActiveTiles(newCoordinates, this.rotationIndex);
-            if (checkCollisions) {
-                var collision = this.getCollisionsHelper(newActiveTiles, tilesToCheck);
-                if (collision === game.NO_COLLISION) {
-                    this.coordinates = newCoordinates;
-                    this.activeTiles = newActiveTiles;
-                }
-
-                return collision;
-            }
-
-            this.coordinates = newCoordinates;
-            this.activeTiles = newActiveTiles;
-        };
-
-        this.getNewCoordinates = function(xDiff, yDiff) {
-            var newCoordinates = []
-            for (var i = 0; i < NUM_TILES_X; i++) {
-                newCoordinates.push([]);
-                for (var j = 0; j < NUM_TILES_Y; j++) {
-                    var newX = this.coordinates[i][j].x + (xDiff * settings.tileSize);
-                    var newY = this.coordinates[i][j].y + (yDiff * settings.tileSize);
-                    newCoordinates[i].push(settings.createVector(newX, newY));
+    /**
+     * Returns true if the block at the given location and rotation will
+     * collide with another block or the game's walls.
+     */
+    var collisions = function(x, y, matrix) {
+        var n = matrix.length;
+        for (var i = 0; i < n; i++) {
+            for (var j = 0; j < n; j++) {
+                if (matrix[i][j] === 1) {
+                    var newX = x + i;
+                    var newY = y + j;
+                    if (newX < 0 || newX >= tetris.COLS ||
+                        newY < 0 || newY >= tetris.ROWS ||
+                        tetris.board[newX][newY])
+                        return true;
                 }
             }
-            return newCoordinates;
-        };
-
-        this.getActiveTiles = function(coordinates, rotation) {
-            var rotationMap = this.rotations[rotation];
-            var newActive = [];
-            for (var i = 0; i < NUM_TILES_X; i++) {
-                for (var j = 0; j < NUM_TILES_Y; j++) {
-                    if (rotationMap[i][j] === 1) {
-                        var vect = coordinates[i][j];
-                        newActive.push(game.createTile(vect.x, vect.y, this.color));
-                    } 
-                }
-            }
-            return newActive;
         }
+        return false;
+    };
 
-        this.getCollisions = function(tilesToCheck) {
-            return this.getCollisionsHelper(this.activeTiles, tilesToCheck);
-        }
-
-        this.getCollisionsHelper = function(tiles, tilesToCheck) {
-            for (var i = 0; i < tiles.length; i++) {
-                var tile = tiles[i];
-                if (tile.x < 0)
-                    return game.LEFT_COLLISION;
-                else if (tile.x + settings.tileSize > settings.screenWidth)
-                    return game.RIGHT_COLLISION;
-                else if (tile.y + settings.tileSize > settings.screenHeight)
-                    return game.BOTTOM_COLLISION;
-
-                for (var j = 0; j < tilesToCheck.length; j++) {
-                    var tileToCheck = tilesToCheck[j];
-                    if (tile.x === tileToCheck.x && tile.y === tileToCheck.y) {
-                        return game.RIGHT_COLLISION; 
+    /**
+     * Check if the active block is sitting on the bottom of the board or
+     * on one of the placed tiles.
+     */
+    var checkBottom = function() {
+        var n = tetris.block.matrix.length;
+        for (var i = 0; i < n; i++) {
+            for (var j = 0; j < n; j++) {
+                if (tetris.block.matrix[i][j] === 1) {
+                    var x = tetris.block.x + i;
+                    var y = tetris.block.y + j;
+                    if (y === tetris.ROWS - 1 || tetris.board[x][y + 1]) {
+                        return true;
                     }
                 }
             }
-            return game.NO_COLLISION;
         }
+    };
 
-        this.checkBottom = function(tilesToCheck) {
-            for (var i = 0; i < this.activeTiles.length; i++) {
-                var tile = this.activeTiles[i];
-                if (tile.y + settings.tileSize >= settings.screenHeight)
-                    return game.BOTTOM_COLLISION;
+    /**
+     * Clears any full rows, pushing the elements above it down one row.
+     */
+    var clearFullRows = function() {
+        for (var j = 0; j < tetris.ROWS; j++) {
+            var count = 0;
+            for (var i = 0; i < tetris.COLS; i++) {
+                if (tetris.board[i][j])
+                    count++;
+            }
 
-                for (var j = 0; j < tilesToCheck.length; j++) {
-                    var tileToCheck = tilesToCheck[j];
-                    if (tile.x === tileToCheck.x && tile.y === tileToCheck.y) {
-                        return game.BOTTOM_COLLISION;
+            if (count === tetris.COLS) {
+                // Full row, need to move all tiles above this down one.
+                for (var i = 0; i < tetris.COLS; i++) {
+                    for (var j2 = j; j2 >= 0; j2--) {
+                        tetris.board[i][j2] = tetris.board[i][j2 - 1];
+                        tetris.board[i][j2 - 1] = undefined;
+                    }
+                }
+            }
+        }
+    };
+
+    /**
+     * Initialize the tetris board and state.
+     */
+    tetris.init = function() {
+        tetris.board = utils.newMatrix(tetris.ROWS, tetris.COLS);
+        tetris.block = tetris.newBlock(tetris.COLS / 2 - 2, 0);
+    };
+
+    /**
+     * Update the game board, making the active piece fall.
+     */
+    tetris.update = function() {
+        if (checkBottom()) {
+            // Need to move the active block to the placed tiles board.
+            var n = tetris.block.matrix.length;
+            for (var i = 0; i < n; i++) {
+                for (var j = 0; j < n; j++) {
+                    if (tetris.block.matrix[i][j] === 1) {
+                        var x = tetris.block.x + i;
+                        var y = tetris.block.y + j;
+                        tetris.board[x][y] = tetris.block.color;
                     }
                 }
             }
 
-            return game.NO_COLLISION;
+            // Clear any full rows if necessary
+            clearFullRows();
+
+            // Now create a new block
+            tetris.block = tetris.newBlock(tetris.COLS / 2 - 2, 0);
+        } else {
+            tetris.moveBlock(0, 1);
         }
-
-        this.setup();
     };
 
-    game.createBlock = function(rotations, color) {
-        return new game.tetrisBlock(rotations, color, settings);
+    /**
+     * Move the active block in the given directions if there are no collisions.
+     */
+    tetris.moveBlock = function(xDiff, yDiff) {
+        var newX = tetris.block.x + xDiff;
+        var newY = tetris.block.y + yDiff;
+        if (!collisions(newX, newY, tetris.block.matrix)) {
+            tetris.block.move(xDiff, yDiff);
+        }
     };
-})(window.game = window.game || {}, settings);
+
+    /**
+     * Rotates the block by 90 degrees if there are no collisions.
+     */
+    tetris.rotateBlock = function() {
+        var newMatrix = utils.rotateMatrix(tetris.block.matrix);
+        if (!collisions(tetris.block.x, tetris.block.y, newMatrix)) {
+            tetris.block.matrix = newMatrix;
+        }
+    };
+})(window.tetris = window.tetris || {}, shapes, colors, utils, settings);
